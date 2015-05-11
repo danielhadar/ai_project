@@ -1,0 +1,1913 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass IEEEtran
+\begin_preamble
+\date{}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language american
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.2cm
+\topmargin 2cm
+\rightmargin 1.2cm
+\bottommargin 2cm
+\secnumdepth -2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation 0bp
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+markboth{The Hebrew University of Jerusalem, March 2015}{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+Crushing Candy Crush - An AI Project
+\end_layout
+
+\begin_layout Author
+Daniel Hadar & Oren Samuel
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{abstract}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this work, we propose several search methods that solve a general Match-3
+ game (a Candy Crush clone, GemGem).
+ More specifically, we try to minimize the number of swaps in each game
+ needed to reach a target score.
+ We use three algorithms, two of them utilize heuristic search techniques,
+ and compare the results to the performance of human subjects.
+ We found that these heuristic techniques provide a significant improvement
+ over a basic greedy approach and human performance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{abstract}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Subsection
+What are Match-3 Games?
+\end_layout
+
+\begin_layout Standard
+On March 26th 2014, the mobile game development company King Digital Entertainme
+nt became a publicly traded company, valued at over $7 Billion.
+ Their most popular game (and the one that brought in most of their capital)
+ was Candy Crush Saga, a Match-3 Puzzle video game, available for play on
+ Facebook and on mobile platforms.
+ This was another milestone in the evolution of Match-3 video games (a subset
+ of the more general Tile Matching category of games), which finds its roots
+ in the well-known Tetris (1985), goes through games like Yoshi's Cookie
+ (1992) and Bejeweled (2001), and is still present today, as King Digital
+ releases new levels for Candy Crush Saga on a weekly basis.
+ Match-3 is a family of single-player video games; The basic, common elements
+ are a game board (usually square or rectangular in shape) and bricks of
+ different types, arranged in a matrix formation on the board.
+ In some games, the bricks change their location independently as time passes;
+ in others, the bricks remain still until the player interferes.
+ The types of moves a player can perform differ between games - moving,
+ swapping and rotating of a single brick or a cluster of bricks all appear
+ in some implementations of Match-3 games.
+ The player’s goal, however, is mostly the same - to identify patterns in
+ the bricks’ arrangement across the board, and create clusters of bricks
+ of the same type.
+ Creating a cluster makes it disappear from the board and awards the player
+ with an amount of points proportional to the cluster’s size.
+\end_layout
+
+\begin_layout Subsection
+The game at hand: GemGem
+\end_layout
+
+\begin_layout Standard
+In order to to research the general Match-3 category of games, we used a
+ basic open-source, 
+\shape italic
+pygame
+\shape default
+-based Candy Crush Saga clone called GemGem.
+ The version presented here is a version we modified for the purpose of
+ this paper; The original version can be found online.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset href
+LatexCommand href
+name "http://inventwithpython.com/blog/2011/06/24/new-game-source-code-gemgem-a-bejeweled-clone/"
+target "http://inventwithpython.com/blog/2011/06/24/new-game-source-code-gemgem-a-bejeweled-clone/"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Rules
+\end_layout
+
+\begin_layout Standard
+In GemGem, the basic setting is a square checkered board.
+ Each cell in the board contains a 'gem' of a certain color.
+ The board's side 
+\emph on
+size
+\emph default
+ and number of unique gems types can be configured by the player: board
+ size can be set in the range 
+\begin_inset Formula $4-8$
+\end_inset
+
+; the number of gem types can be set in the range 
+\begin_inset Formula $4-7$
+\end_inset
+
+.
+ A player's 
+\shape italic
+swap
+\shape default
+ (i.e move) consists of choosing two adjacent gems to switch between.
+ We say that a swap is 
+\shape italic
+valid
+\shape default
+ if and only if it produces a board where there is at least one 
+\shape italic
+sequence
+\shape default
+ - a vertical or horizontal chain of 
+\begin_inset Formula $3$
+\end_inset
+
+ or more consecutive gems of the same type.
+ An invalid swap is not allowed.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename cascade.png
+	scale 24
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 1: A starting board is drawn at the top.
+ On the left branch, the resulting cascade (of length 1) when moving the
+ green gem at position 
+\begin_inset Formula $\left(2,3\right)$
+\end_inset
+
+ down.
+ On the right branch, the resulting cascade (of length 2) when moving the
+ green gem at position 
+\begin_inset Formula $\left(3,2\right)$
+\end_inset
+
+ down.
+ The resulting (minimal) scores a written alongside the boards.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Once a valid swap is performed, the following process is initiated:
+\end_layout
+
+\begin_layout Enumerate
+The gems in the created sequence(s) are 
+\shape italic
+cleared
+\shape default
+, rendering their cells empty.
+\end_layout
+
+\begin_layout Enumerate
+The gems which reside above the empty cells are pulled down in a gravitational
+ manner, filling the empty cells.
+ The fallen gems' original cells become empty.
+\end_layout
+
+\begin_layout Enumerate
+New gems 
+\shape italic
+appear
+\shape default
+ (i.e “fall down”) in the now empty cells.
+\end_layout
+
+\begin_layout Enumerate
+If the process creates new gem sequences, return to step 1.
+ Otherwise, wait for the player's next swap.
+\end_layout
+
+\begin_layout Standard
+This 
+\begin_inset Quotes eld
+\end_inset
+
+chain reaction
+\begin_inset Quotes erd
+\end_inset
+
+, i.e a series of 1 or more such iterations, is called a 
+\shape italic
+cascade
+\shape default
+.
+ Once the the iteration process is finished, i.e there are no remaining sequences
+ on the board, we say that the board is 
+\shape italic
+stable
+\shape default
+.
+ See Figure 1 for an example.
+\end_layout
+
+\begin_layout Standard
+If there are no valid swaps on the board, we say that we've reached a 
+\shape italic
+game-over
+\shape default
+ state.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Assumptions
+\end_layout
+
+\begin_layout Standard
+Under the given rules, there are many ways one could interpret some aspects
+ of the game's behavior.
+ We tried to be as straightforward as possible - the most 
+\shape italic
+neat
+\shape default
+ interpretation is also the 
+\shape italic
+best
+\shape default
+ interpretation.
+ Utilizing this approach, the game's behavior is defined in the following
+ manner:
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Clusters:
+\series default
+ If a swap creates a 
+\shape italic
+cluster 
+\shape default
+(i.e an arbitrary arrangement of consecutive same-colored gems), the board
+ is only cleared of gems that form parts of actual sequences.
+ Other gems in the cluster are kept on the board (see Figure 2).
+ That is in contrast to some Match-3 variants where a whole cluster is can
+ be cleared from the board.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Randomization of appearing gems: 
+\series default
+The appearing gems (that fill the empty spaces, created by cleared sequences)
+ are chosen uniformly at random.
+ That is in disagreement with the original implementation of GemGem, which
+ prevented from appearing gems to be identically-colored to their neighbors
+ on the board.
+ When the game is configured such that the number of gem types is small,
+ this assumption might cause very long cascades; however, violating this
+ assumption makes the game almost deterministic, which is an even more undesirab
+le trait.
+\end_layout
+
+\begin_layout Enumerate
+
+\series bold
+Randomization of the initial board: 
+\series default
+Contrary to the previous assumption, the initialization of the board is
+ not random.
+ The board is initialized such that there are no sequences - so no 
+\begin_inset Quotes eld
+\end_inset
+
+free
+\begin_inset Quotes erd
+\end_inset
+
+ points are given to the player, and the playing field is leveled, so to
+ speak, when starting a game.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename clusters.png
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 2: A starting board is drawn at the top.
+ On the left branch, the resulting sequence (of size 3) when moving the
+ red gem at position 
+\begin_inset Formula $\left(3,3\right)$
+\end_inset
+
+ right.
+ On the right branch, the resulting red cluster (of size 5) and blue sequence
+ (of size 3) when moving the blue gem at position 
+\begin_inset Formula $\left(4,3\right)$
+\end_inset
+
+ right.
+ The resulting (minimal) scores are written below the boards.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Scoring Method
+\end_layout
+
+\begin_layout Standard
+A cascade awards the player 
+\begin_inset Formula $p$
+\end_inset
+
+ points, where 
+\begin_inset Formula $p$
+\end_inset
+
+ is the number of gems cleared during the cascade.
+ For example, in Figure 1, the move presented in the right branch will yield
+ a score of at least 
+\begin_inset Formula $6$
+\end_inset
+
+.
+ Similarly, the right branch in Figure 2 will yield a score of at least
+ 
+\begin_inset Formula $8$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We say 
+\shape italic
+at least
+\shape default
+ because of assumption 2 mentioned before - appearing gems are randomized,
+ therefore they can create sequences with the gems already on the board
+ - making the cascade longer and clearing additional gems.
+\end_layout
+
+\begin_layout Subsection
+Problem Definition
+\end_layout
+
+\begin_layout Standard
+Once the rules of the game are well-defined, we can take on the mission
+ of defining the abstract problem that lies within the game.
+\end_layout
+
+\begin_layout Standard
+There are many natural problems that arise from the given set of rules.
+ We've concluded that, from an AI point of view, there are 3 problems that
+ would be interesting to tackle:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Given an 
+\begin_inset Formula $s\times s$
+\end_inset
+
+ Match-3 board containing 
+\begin_inset Formula $g$
+\end_inset
+
+ types of gems, try to:
+\end_layout
+
+\begin_layout Description
+(P1) Minimize the number of swaps needed to reach a score of at least 
+\begin_inset Formula $c$
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Description
+(P2) Maximize the score while performing at most 
+\begin_inset Formula $k$
+\end_inset
+
+ moves, or
+\end_layout
+
+\begin_layout Description
+(P3) Perform as many moves as possible without reaching a game-over state.
+\end_layout
+
+\begin_layout Standard
+We've chosen to tackle P1; We will later describe possible modifications
+ to our approach that could tackle P2 and P3.
+\end_layout
+
+\begin_layout Standard
+The problem is interesting because of the complexity of predicting a large
+ amount of possible future moves (similarly to chess-like games) - thus
+ AI tools are expected to improve the results when compared to simpler algorithm
+s and human subjects.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+NP Completeness
+\end_layout
+
+\begin_layout Standard
+Two papers, both published in March 2014, took on proving that problems
+ arising from Match-3 games are NP-Complete.
+\end_layout
+
+\begin_layout Standard
+The first paper, by Guala, Leucci and Natale
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Gualà, L., Leucci, S., & Natale, E.
+ (2014).
+ Bejeweled, Candy Crush and other Match-Three Games are (NP-) Hard.
+ arXiv preprint arXiv:1403.5830.
+ Full PDF here: 
+\begin_inset CommandInset href
+LatexCommand href
+name "http://arxiv.org/abs/1403.5830"
+target "http://arxiv.org/abs/1403.5830"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+, defines 5 such problems (denoted Q1 through Q5).
+ The first of which (Q1) is formulated in the following manner: 
+\shape italic
+Is there a sequence of moves that allows the player to pop a specific gem?
+ 
+\shape default
+The authors then go on to prove that Q1 is NP-Complete.
+ Then, Q2 through Q5 are proven to be NP-Complete by reduction to Q1.
+ 
+\end_layout
+
+\begin_layout Standard
+Q3 is of special interest to us, and is formulated as such: 
+\shape italic
+Can the player get a score of at least c in less than k moves? 
+\shape default
+This problem is very similar to our problem (P1), and we can perform a simple
+ decision-to-search reduction from Q3 to P1: If we are to minimize the number
+ of swaps moves needed to achieve a score 
+\begin_inset Formula $c$
+\end_inset
+
+, we can check whether 
+\begin_inset Formula $c$
+\end_inset
+
+ is achievable within 
+\begin_inset Formula $1$
+\end_inset
+
+ move; if not, check whether it's achievable within 2 moves, and so on.
+ The first time we get a positive answer will give us the minimal number
+ of moves needed to reach score 
+\begin_inset Formula $c$
+\end_inset
+
+.
+ This, if so, implies that P1 is indeed NP-Complete.
+ In a very similar approach, we can show that P2 is NP-Complete.
+ And, if we utilize Q5 from Guala's paper, we can show that P3 is NP-Complete
+ as well.
+ It is noteworthy that the second paper, by Walsh
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Walsh, T.
+ (2014).
+ Candy Crush is NP-hard.
+ arXiv preprint arXiv:1403.1911.
+ Full PDF here: 
+\begin_inset CommandInset href
+LatexCommand href
+name "http://arxiv.org/abs/1403.1911"
+target "http://arxiv.org/abs/1403.1911"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+, shows that Q3 is NP-Complete, too, and does so by formulating a reduction
+ to the 3-SAT problem.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Setting the Parameters
+\end_layout
+
+\begin_layout Standard
+In our tests, the board size 
+\begin_inset Formula $s$
+\end_inset
+
+ is set to 
+\begin_inset Formula $6$
+\end_inset
+
+ and the number of gem types 
+\begin_inset Formula $g$
+\end_inset
+
+ is set to 
+\begin_inset Formula $4$
+\end_inset
+
+.
+ The target score 
+\begin_inset Formula $c$
+\end_inset
+
+ is set to 
+\begin_inset Formula $250$
+\end_inset
+
+.
+ We took these decisions after running preliminary tests over all of the
+ possible combinations 
+\begin_inset Formula $\left(s,g\right)\in\left\{ 4,5,6,7,8\right\} \times\left\{ 4,5,6,7\right\} $
+\end_inset
+
+.
+ Our analysis showed that when 
+\begin_inset Formula $\nicefrac{s}{g}\leq1$
+\end_inset
+
+, the proportion of games reaching a premature game-over state (i.e ending
+ before the target score is reached) was 
+\begin_inset Formula $\geq\frac{1}{2}$
+\end_inset
+
+, and this proportion grows as 
+\begin_inset Formula $\nicefrac{s}{g}$
+\end_inset
+
+ decreases (see Figure 3).
+ On the other hand, when 
+\begin_inset Formula $\nicefrac{s}{g}$
+\end_inset
+
+ increases and approaches 
+\begin_inset Formula $2$
+\end_inset
+
+, the game-over rate decreases dramatically, but there are too many valid
+ swaps on the board for our algorithms to have a reasonable runtime.
+ Therefore, we concluded that 
+\begin_inset Formula $s=6$
+\end_inset
+
+ and 
+\begin_inset Formula $g=4$
+\end_inset
+
+ (i.e 
+\begin_inset Formula $\nicefrac{s}{g}=1.5$
+\end_inset
+
+) is a good compromise - there's a relatively small chance of reaching a
+ dead-end (game-over state), while the number of valid swaps is small enough
+ that we can run thousands of games in a reasonable amount of time.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename sdivg.png
+	scale 36
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 3: Game-over rate as a function of 
+\begin_inset Formula $\nicefrac{s}{g}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Approach and Methods
+\end_layout
+
+\begin_layout Subsection
+Why Search?
+\end_layout
+
+\begin_layout Standard
+Generally speaking, the problem at hand requires us, given a game board,
+ to choose a minimal series of swaps which will beat a certain score.
+ The natural approach to this kind of problem, which we indeed chose, is
+ to use search techniques - where the state space is the set of all possible
+ boards, and the transitions are valid swaps that transform one board to
+ another.
+ Another somewhat natural approach is to use machine learning techniques
+ - however, it is not as suitable, because of the huge size of the problems
+ state space (
+\begin_inset Quotes eld
+\end_inset
+
+board space
+\begin_inset Quotes erd
+\end_inset
+
+).
+ Roughly speaking, assuming each of the 
+\begin_inset Formula $s^{2}$
+\end_inset
+
+ cells on the board can be filled by any of the 
+\begin_inset Formula $g$
+\end_inset
+
+ gem types, the state space's size is in the vicinity of 
+\begin_inset Formula $g^{s^{2}}$
+\end_inset
+
+.
+ For our chosen values (
+\begin_inset Formula $s=6,\ g=4$
+\end_inset
+
+) this results in a state space of size 
+\begin_inset Formula $\sim2^{72}$
+\end_inset
+
+.
+ This means that encountering he same board twice is unlikely, and therefore
+ learning the best swap to perform on a given board is not a trivial task.
+\end_layout
+
+\begin_layout Subsection
+The Non-Determinism Question
+\end_layout
+
+\begin_layout Standard
+Finding an optimal series of transitions through state space is a relatively
+ simple task when dealing with a 
+\shape italic
+deterministic
+\shape default
+ world - one where the result of a move can be predicted.
+ In our problem, however, this isn't the case - since after every swap (and
+ the resulting cascade) random gems are dropped from the top of the board,
+ we're dealing with a 
+\shape italic
+non-deterministic
+\shape default
+ search problem.
+ Therefore, a simple application of a general search algorithm cannot work
+ in our case, and we have to resort to our own variants of searching techniques.
+\end_layout
+
+\begin_layout Subsection
+Problem Representation
+\end_layout
+
+\begin_layout Standard
+In order to represent the problem in search terms, we can define the problem
+ in the following manner: we are given a graph 
+\begin_inset Formula $G=\left\langle V,E\right\rangle $
+\end_inset
+
+ where 
+\begin_inset Formula $V=\left\{ v\ :\ v\text{ is a board}\right\} $
+\end_inset
+
+ and 
+\begin_inset Formula $E=\left\{ e=\left\langle v_{1},v_{2}\right\rangle \ :\ v_{1},v_{2}\in V\text{; }e\text{ is a swap that yields }v_{2}\text{ from }v_{1}\right\} $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The starting point of the graph is the start board.
+ This is an abstract definition that will help us think about the problem
+ in search terms; it does not, however, capture the non-determinism described
+ previously - more about this in the Methods section.
+ 
+\end_layout
+
+\begin_layout Subsection
+Methods
+\end_layout
+
+\begin_layout Standard
+We implemented 3 algorithms and 5 heuristics (detailed below).
+ The first algorithm is a non-heuristic “stupid” baseline algorithm; the
+ other two decide which move to preform using a weighing of the different
+ heuristics.
+ The average per-swap running times of these algorithms are presented in
+ Figure 5.
+\end_layout
+
+\begin_layout Subsubsection
+
+\series bold
+The Algorithms
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Stupid Greedy Search (SGS): 
+\series default
+Given a board, the algorithm finds all the valid swaps and computes their
+ direct score, i.e the number of gems about to be cleared solely from the
+ swap itself, without considering the (possibly) resulting cascade.
+ The chosen swap is the maximal swap with respect to the direct score; if
+ there are several maximal swaps, one of them is chosen at random.
+ This algorithm serves as a good baseline, since as shown in the Results
+ section, it gives a good model for the behavior of human players.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Heuristic Greedy Search (HGS): 
+\series default
+Similarly to SGS, HGS chooses the best swap that can be done in the current
+ board with respect to its immediate result (and hence the title 'greedy').
+ Contrary to SGS, the score of each swap is calculated including the predicted
+ cascade, and is given based on the different heuristics - different weights
+ can be assigned to each heuristic, and interesting weighted combinations
+ between them can be created.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Limited Breadth First Search (L-BFS): 
+\series default
+Similarly to HGS, L-BFS chooses the best move using simulation of cascades
+ and using heuristic scoring.
+ Contrary to HGS, this algorithms performs a look-ahead, or simulation,
+ of several swaps, effectively performing a breadth-first search through
+ the graph of boards described earlier.
+ The algorithm begins with the start board as a root node.
+ Then, all the possible swaps are found, their resulting boards are calculated,
+ and these boards are added as nodes in the graph.
+ The process is then applied to all the new nodes, and the same process
+ is performed iteratively.
+ The process stops when all nodes have reached a state we call 
+\shape italic
+cutoff 
+\shape default
+(and hence the 'limited' part)
+\shape italic
+,
+\shape default
+ which means the at least one of two properties apply to the relevant board:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The board is in a game-over state.
+\end_layout
+
+\begin_layout Itemize
+The board has reached a predefined 
+\shape italic
+uncertainty limit: 
+\shape default
+denote 
+\begin_inset Formula $u=\frac{d}{s^{2}}$
+\end_inset
+
+ where 
+\begin_inset Formula $d$
+\end_inset
+
+ is the total score of the swap series leading up to the current board (i.e
+ the number of gems cleared in the current branch of the look-ahead) and
+ 
+\begin_inset Formula $s$
+\end_inset
+
+ is the board size.
+ Then 
+\begin_inset Formula $u$
+\end_inset
+
+ is the 
+\shape italic
+uncertainty factor
+\shape default
+ of the board - it represents the percentage of the board which is unknown
+ to us.
+ Therefore, if 
+\begin_inset Formula $u$
+\end_inset
+
+ passes a certain (predetermined) uncertainty limit 
+\begin_inset Formula $0\leq U\leq1$
+\end_inset
+
+, we deem he board 
+\begin_inset Quotes eld
+\end_inset
+
+too uncertain
+\begin_inset Quotes erd
+\end_inset
+
+ to continue looking ahead from.
+ For example, in Figure 1, the last board in the right branch has an uncertainty
+ factor of 
+\begin_inset Formula $u=\frac{d}{s^{2}}=\frac{6}{4^{2}}=0.375$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Finally, when all nodes are at a cutoff state, we say that they are 
+\shape italic
+leaves
+\shape default
+ of the search graph, and we chose the best move by applying our heuristic
+ to each leaf (and sometimes, to the series of boards leading up to it).
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+
+\series bold
+The Heuristics
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Score:
+\series default
+ The amount of cleared gems (cascade included).
+ When applied to the L-BFS algorithm, we use a variant of this heuristic
+ - the average score per swap in the swap series leading up to a leaf node.
+ This is done since we're aiming to minimize the number of swaps.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Pairs: 
+\series default
+The number of pairs (adjacent gems of the same type) that remain on the
+ board after the cascade.
+ In L-BFS, this is applied to the last board in the simulation.
+ The motivation here is that a board with more pairs is better since it
+ is more promising in terms of future possible moves.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Moves:
+\series default
+ The number of possible future moves in the resulting board.
+ In L-BFS, this is applied to the last board in the simulation.
+ The motivation is similar to the 
+\begin_inset Quotes eld
+\end_inset
+
+Pairs
+\begin_inset Quotes erd
+\end_inset
+
+ heuristic.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Depth: 
+\series default
+The row where the swap was performed (1-based counting from the top of the
+ board).
+ In L-BFS, we take the average depth over the series of simulated swaps.
+ The motivation to use this value lies in the fact that deeper swaps cause
+ more gems to move - a deep vertical sequence, when cleared, causes the
+ entire column above it to 
+\begin_inset Quotes eld
+\end_inset
+
+fall down
+\begin_inset Quotes erd
+\end_inset
+
+, whereas a shallow sequence results only in the movement of the appearing
+ gems.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Touching
+\series default
+: The number of gems that will have new neighbors after the cascade (i.e.
+ the “frame” of the appearing gems), in a 4-neighbors fashion.
+ The idea is that a higher 'Touching' value implies a higher chance of large
+ cascades.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename heuristics.png
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 4: Starting with the board on the top, we swap the red gem at 
+\begin_inset Formula $\left(2,4\right)$
+\end_inset
+
+ with the green gem at 
+\begin_inset Formula $\left(2,3\right)$
+\end_inset
+
+.
+ The heuristic values for the resulting (bottom) board will be: Score -
+ 3; Depth - 4; Pairs - 4; Moves - 1; and Touching - 7.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename swap_times.png
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 5: Average running time for a single swap choice (logarithmically
+ scaled), for each algorithm (for L-BFS - also with different uncertainty
+ limits).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Implementation Issues
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Simulation of Appearing Gems:
+\series default
+ In L-BFS, when predicting future boards (derived from simulated swaps),
+ we had to decide how to approach the appearing gems.
+ On the one hand, we can simulate them using the same distribution function
+ used when actually generating the gems (see assumption 2) and take them
+ into account when looking for swaps in a future board.
+ On the other hand, we can view the cleared cells as empty, and opt to use
+ only the gems that we know for certain will exist in that board.
+ In favor of the first approach is the fact that it tries to mimic the real
+ behavior of the game, so it might give a better prediction of the gems
+ on the board after several swaps.
+ However, a similar gem distribution does not guarantee a similar gem arrangemen
+t - and the arrangement, which is unpredictable, has a crucial effect on
+ all of the heuristic values.
+ In favor of the second one is the fact that every predicted swap will almost
+ certainly be a valid future swap - as opposed to the first approach, where
+ we might predict swaps (and cascades) on gems that will never actually
+ exist.
+ We ruled in favor of the second approach, as it avoids the exaggerated
+ promotion of high-scoring imaginary swaps that will not be valid in the
+ future boards.
+ Preliminary tests supported our intuition and gave worse results when simulatin
+g appearing gems; we saw that oftentimes the algorithm chooses a swap based
+ on false predictions.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Reevaluation Timing (Sequence vs.
+ Single move):
+\series default
+ As stated before, in each L-BFS step we predict paths from the current
+ board until we reach a cutoff.
+ Once choosing the best leaf node, we are faced with two options: either
+ perform the entire sequence of swaps leading up to the leaf, or only perform
+ the first one.
+ One main advantage of the sequence approach is running time - we only need
+ to search through the board space once every few swaps, whereas in the
+ single step approach we need to search after every swap.
+ However, the sequence approach might, in some cases, cause us to try invalid
+ swaps.
+ We opted for the more deterministic single-step approach.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+Calibration of the Uncertainty Limit 
+\series default
+
+\begin_inset Formula $U$
+\end_inset
+
+
+\series bold
+: 
+\series default
+Intuitively, 
+\begin_inset Formula $U$
+\end_inset
+
+ should be well below 
+\begin_inset Formula $0.5$
+\end_inset
+
+ - for if we don't know the contents of more than half the board, our swap
+ choices will surely be poor.
+ However, if it is set too low, L-BFS might be too limited with respect
+ to the length of the simulated swap series.
+ Running time also has a say in this - setting 
+\begin_inset Formula $U$
+\end_inset
+
+ too high might make the swap series too long for L-BFS to run in a reasonable
+ time (see Figure 5).
+ We found that setting 
+\begin_inset Formula $U$
+\end_inset
+
+ around 
+\begin_inset Formula $0.2$
+\end_inset
+
+ gives a good balance of the different considerations.
+\end_layout
+
+\begin_layout Subsection
+Test Plan
+\end_layout
+
+\begin_layout Standard
+We carried out a 3-tiered testing scheme, where the first two tiers were
+ aimed at calibrating the algorithms for the third, final, testing tier.
+ Needless to say, many of the implementation issues previously described
+ were solved by these tests.
+ We denote our five heuristic by 
+\begin_inset Formula $hs$
+\end_inset
+
+ (Score), 
+\begin_inset Formula $hp$
+\end_inset
+
+ (Pairs), 
+\begin_inset Formula $hn$
+\end_inset
+
+ (Moves), 
+\begin_inset Formula $hd$
+\end_inset
+
+ (Depth), and 
+\begin_inset Formula $ht$
+\end_inset
+
+ (Touching).
+ We denote their corresponding weights by 
+\begin_inset Formula $ws$
+\end_inset
+
+, 
+\begin_inset Formula $wp$
+\end_inset
+
+, 
+\begin_inset Formula $wn$
+\end_inset
+
+, 
+\begin_inset Formula $wd$
+\end_inset
+
+, and 
+\begin_inset Formula $wt$
+\end_inset
+
+.
+ The vector 
+\begin_inset Formula $\left[ws,\ wp,\ wn,\ wd,\ wt\right]$
+\end_inset
+
+ is a 
+\shape italic
+weight vector.
+ 
+\shape default
+The following describes the games we ran to test our algorithms; the results
+ are show in the next section.
+\end_layout
+
+\begin_layout Enumerate
+Preliminary Tests:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+100 SGS games.
+\end_layout
+
+\begin_layout Enumerate
+5 human subjects, 10 games each.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Basic Heuristics and Combinations:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+30 games of HGS, with every 
+\begin_inset Formula $\left[ws,\ wp,\ wn,\ wd,\ wt\right]\in\left\{ 0,1\right\} ^{5}$
+\end_inset
+
+ (i.e, every possible linear combination of the vectors in the canonical
+ basis of 
+\begin_inset Formula $\mathbb{R}^{5}$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Enumerate
+30 games of L-BFS with the same weights.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Weight Calibration:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+30 games of HGS: all possible weight vectors 
+\begin_inset Formula $\left[ws,\ wp,\ wn,\ wd,\ wt\right]$
+\end_inset
+
+ over all the weights between 
+\begin_inset Formula $0$
+\end_inset
+
+ and 
+\begin_inset Formula $2$
+\end_inset
+
+, in 
+\begin_inset Formula $0.2$
+\end_inset
+
+ intervals (e.g 
+\begin_inset Formula $\left[0.2,0.4,1.8,0.4,0\right]$
+\end_inset
+
+ )
+\end_layout
+
+\begin_layout Enumerate
+30 games of L-BFS, with the same weight combinations.
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+First we show in Figure 6 the basic results (i.e, the average number of swaps
+ required to reach a score of 
+\begin_inset Formula $250$
+\end_inset
+
+, over 30 games) when running each individual heuristic by itself (e.g using
+ a weight vector 
+\begin_inset Formula $\left[0,1,0,0,0\right]$
+\end_inset
+
+).
+ The average results of SGS and human subjects are shown for comparison.
+ 
+\end_layout
+
+\begin_layout Standard
+We can easily notice that the Score heuristic is the most prominent, and
+ the Moves and Pairs heuristics are consistently ineffective.
+ The Depth and Touching heuristics are somewhere in between.
+ Note that the same heuristic in the two different algorithms gives a similar
+ outcome (with L-BFS winning by a small margin), except in the Touching
+ heuristic, which behaves very differently.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename basic10.png
+	scale 45
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 6: Average results for individual heuristics, with SGS and human
+ averages for comparison.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename full_calibration.png
+	scale 57
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 7: Average results for basic heuristic combinations, with SGS and
+ human averages for comparison.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above results give a general idea of the effectiveness of each individual
+ heuristic.
+ The next step is to look at their basic combinations - i.e the set of all
+ 
+\begin_inset Quotes eld
+\end_inset
+
+canonical
+\begin_inset Quotes erd
+\end_inset
+
+ weight vectors - 
+\begin_inset Formula $\left\{ 0,1\right\} ^{5}$
+\end_inset
+
+.
+ The results for these tests are shown in Figure 7.
+\end_layout
+
+\begin_layout Standard
+As we saw before, when including the Score heuristic (the top half of the
+ graph in Figure 7), we get generally better results.
+ These results also hinted us that the Moves heuristic might be ineffective,
+ and in fact worsens our results.
+ This ineffectiveness can be seen in the graph presented in Figure 8 - indeed,
+ the Moves heuristic does not help us, at all, to lower the swap count.
+ Therefore, in the weight calibration process, we decided to omit it in
+ further testing.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename dropping_nmvoes.png
+	scale 45
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 8: The average swap count when using the Score heuristic with each
+ of the other four (left) and when using each of the four non-Score heuristics
+ individually (right).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename top10.png
+	scale 45
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\shape italic
+\size small
+Figure 9: The top 10 heuristics and their average swap count.
+ SGS and human results are too far out to show (at 25.2 and 28.8, respectively)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the next and final step, we performed a weight calibration, in order
+ to find the best weight vector (with 
+\begin_inset Formula $wn$
+\end_inset
+
+ zeroed out).
+ Figure 9 shows the top 10 heuristic combinations.
+\end_layout
+
+\begin_layout Standard
+We now proceed to analyze the above results.
+\end_layout
+
+\begin_layout Section
+Analysis
+\end_layout
+
+\begin_layout Standard
+When looking at the top 10 heuristic combinations, we can first see that
+ L-BFS has a small advantage over HGS - 6 of the top 10 (and 4 of the top
+ 5) combinations utilize L-BFS.
+ Moreover, the top 2 combinations are L-BFS.
+ When looking at the numbers, achieving a swap count of less than 
+\begin_inset Formula $16$
+\end_inset
+
+ means that these algorithms averaged over 
+\begin_inset Formula $15.7$
+\end_inset
+
+ points per move.
+ This is a very good result - it means that, in average, these algorithms
+ cleared 
+\begin_inset Formula $44\%$
+\end_inset
+
+ of the board in every swap.
+ For comparison, human subjects averaged 
+\begin_inset Formula $8.9$
+\end_inset
+
+ points per move (clearing only 
+\begin_inset Formula $24\%$
+\end_inset
+
+ of the board, on average), 
+\begin_inset Formula $\sim43\%$
+\end_inset
+
+ less
+\end_layout
+
+\begin_layout Standard
+It is obvious that the 
+\begin_inset Formula $hs$
+\end_inset
+
+ value is the most important factor, followed by the 
+\begin_inset Formula $hd$
+\end_inset
+
+ value.
+ This makes sense - we're aiming to minimize the number of swaps to reach
+ a certain score, therefore we're aiming to maximize the score of each swap.
+ As any beginner Candy Crush player could tell - nothing beats a high scoring
+ move with a long cascade.
+ That being said, using 
+\begin_inset Formula $hs$
+\end_inset
+
+ alone comes in at a close second, after a combination using 
+\begin_inset Formula $hs$
+\end_inset
+
+, 
+\begin_inset Formula $hp$
+\end_inset
+
+, 
+\begin_inset Formula $hd$
+\end_inset
+
+ and 
+\begin_inset Formula $ht$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The prominence of 
+\begin_inset Formula $hs$
+\end_inset
+
+ is more apparent in L-BFS than in HGS - since L-BFS foresees several steps
+ into the future, and therefore is able to chose the swap with the best
+ score in its horizon.
+ HGS, on the other hand, gains a larger benefit from the help of other predictio
+ns, such as the 
+\begin_inset Formula $hp$
+\end_inset
+
+ and 
+\begin_inset Formula $ht$
+\end_inset
+
+ values, since 
+\begin_inset Formula $hs$
+\end_inset
+
+ on its own is not a good enough predictor when looking only one step ahead.
+ 
+\end_layout
+
+\begin_layout Standard
+If we take a step back and observe the graph in Figure 6, we see an anomaly
+ mentioned before, regarding the 
+\begin_inset Formula $ht$
+\end_inset
+
+ value - when used by itself, it yields good results when using HGS, in
+ contrast to very bad results when used in L-BFS.
+ It is the only heuristic value which presents this pattern.
+ Our explanation for this behavior is the chaotic nature of the 
+\begin_inset Formula $ht$
+\end_inset
+
+ value, when looking more than one step ahead.
+ In HGS, the 
+\begin_inset Formula $ht$
+\end_inset
+
+ value is the deterministic number neighbors that the appearing gems will
+ have after the move is performed; while in L-BFS, the 
+\begin_inset Formula $ht$
+\end_inset
+
+ value of a swap is associated with the last board in the series of swaps,
+ where the 
+\begin_inset Quotes eld
+\end_inset
+
+frame
+\begin_inset Quotes erd
+\end_inset
+
+ for the appearing gems might be very different.
+ This is in contrast, for example, to the 
+\begin_inset Formula $hp$
+\end_inset
+
+ value, where most pairs that exist on the last board in the swap series
+ will probably remain there after performing the swaps.
+\end_layout
+
+\begin_layout Standard
+Revisiting Figure 8, we want to explain the anomaly of 
+\begin_inset Formula $hn$
+\end_inset
+
+ (Move heuristic) being an ineffective heuristic.
+ Prior to the actual tests, 
+\begin_inset Formula $hn$
+\end_inset
+
+ seemed to us as an efficient heuristic since a board with more valid swaps
+ is a more “promising” board, in terms of the number of choices we can make.
+ But as in life itself, the 
+\shape italic
+paradox of choice
+\shape default
+ appears also in GemGem, and the results showed us that a board with more
+ moves isn't, in fact, better.
+ This has two reasons.
+ First, high-scoring moves result in boards with fewer gems, and boards
+ with fewer gems generally contain less valid swaps - so using a high 
+\begin_inset Formula $wn$
+\end_inset
+
+ value actually causes the algorithms to chose lower-scoring moves.
+ Second, the amount of moves isn't necessarily in correlation with their
+ quality; for example one could easily imagine a board with 2 valid swaps,
+ where one swap yields a board with 
+\begin_inset Formula $k>1$
+\end_inset
+
+ 3-point valid swaps, and the other swap yields a board with one 15-point
+ swap - choosing the first one isn't better.
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+Observing the outcomes of out tests, we were glad to see that a computer
+ algorithm can be significantly better than humans in Candy Crush - this
+ shows that it is not only a game of luck, but also of strategy and calculation.
+ Given different prediction abilities, and utilizing a variety of heuristic
+ calculations, the computer's results can vary widely, sometimes for the
+ better, and sometimes for the worse.
+ We saw that, unsurprisingly, when trying to maximize the score of a swap,
+ using a score-based heuristic yields the best results.
+ However, other heuristic values, associated with the placement of a swap
+ on the board and the characteristics of the board resulting from the swap,
+ can have a positive effect on the result, especially when performing a
+ one-step prediction.
+\end_layout
+
+\begin_layout Standard
+As for further research, there's a lot that is left to uncover.
+ First, regarding the problem settings - we chose a specific board size
+ and number of gem types; even though changing these values keeps the main
+ idea of the problem the same, it might be the case that our algorithms
+ and heuristics will produce very different results when testing them with
+ different settings.
+ Our code easily supports this kind of modification, and one could easily
+ take it from here.
+\end_layout
+
+\begin_layout Standard
+Second, regarding the problem definition - as shown before, there are many
+ problems that can be defined using the basic Match-3 rules.
+ We chose to minimize the number of swaps to achieve a certain score, and
+ the dual problem of maximizing the score within a limited number of swaps
+ is probably similar, since solutions for both these problems aim to maximize
+ the score-per-swap ratio.
+ The third problem we described, however, is substantially different - maximize
+ the number of swaps without reaching game-over.
+ In this problem the score doesn't really count, so the methods we could
+ use to tackle it might be different - for example, the Moves heuristic
+ might perform well in this case.
+ It is also much more interesting in boards with a high 
+\begin_inset Formula $\nicefrac{s}{g}$
+\end_inset
+
+ factor, as we saw previously.
+\end_layout
+
+\begin_layout Standard
+Third, even the simplest Candy Crush levels offer more complex challenges
+ than score maximization - non-rectangular boards, popping specific gems,
+ special combo-candies which can pop the gems around them, and many others.
+ Each of these challenges can be a research subject in itself.
+\end_layout
+
+\end_body
+\end_document
